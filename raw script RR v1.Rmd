@@ -1,0 +1,19 @@
+leggiamo il file
+
+```{r esploration}
+setwd("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/dataset")
+list.files()
+act1<-read.csv("activity.csv")
+names(act1)
+library(xtable)
+View(xtable(table(act1$steps)))
+table(act1$date)
+table(act1$interval)
+
+unique(act1$steps)
+
+table(is.na(act1$steps))
+table(is.na(act1$interval))
+table(is.na(act1$date))
+```
+come contare i NA sul totale?
