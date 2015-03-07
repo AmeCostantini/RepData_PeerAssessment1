@@ -1,0 +1,67 @@
+Setting directories and reading file
+
+```{r esploration}
+setwd("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1")
+list.files()
+act1<-read.csv("activity.csv")
+```
+```{r first exploartion}
+names(act1)
+#library(xtable)
+library(ggplot2)
+#View(xtable(table(act1$steps)))
+table(act1$date)
+table(act1$interval)
+unique(act1$steps)
+table(is.na(act1$steps))
+table(is.na(act1$interval))
+table(is.na(act1$date))
+```
+
+## What is mean total number of steps taken per day?
+```{r summary}
+library(dplyr)
+act1_agg1<-group_by(subset(act1,!is.na(steps)), date)
+act1_agg2<-summarise(act1_agg1,
+                     steps_per_each_day_mean=mean(steps),
+                     steps_per_each_day_median=median(steps),
+                     steps_per_each_day=sum(steps),
+                     measurements_per_each_day=n())
+```
+non capisco perché la mediana è pari a zero
+```{r}
+act_pp<-subset(act1,!is.na(steps))
+median(act_pp$steps)
+quantile(act_pp$steps, seq(0,1,0.1))
+```
+la mediana è zero perché la maggior parte dei valori è zero
+
+Ora, ho calcolato la media dei passi per ogni giorno. la media giornaliera sarà la media semplice p ponderata delle medie
+giornaliere (ogni giorno sono 288 osservazioni - certificato, ma da scrivere)?
+
+credo di aver sbagliato nel chunk summary, la media giornaliera è in realtà la media per intervallo!
+
+credo che alla domanda si risponda così
+```{r}
+mean(act1_agg2$steps_per_each_day)
+median(act1_agg2$steps_per_each_day)
+ggplot(data=act1_agg2, aes(x=steps_per_each_day))+
+  geom_histogram(color="blue", binwidth=500)+
+  geom_vline(xintercept=mean(act1_agg2$steps_per_each_day), color="green")
+  
+```
+devo mettere i nomi alle rette
+
+La media è `mean(act1_agg2$steps_per_each_day)`
+oppure l'istogramma dovrebbe rappresentare ogni singolo giorno?
+```{r}
+ggplot(data=act1_agg2, aes(x=date, y=steps_per_each_day))+
+  geom_bar(color="blue")+
+  stat_identity()
+```
+alt, devo capire bene e questo scatterplot di merda mi ha anche fatto capire che devo esplorare meglio il dataset
+
+```{r}
+ggplot(data=act1_agg2, aes(x=date, y=steps_per_each_day))+
+  geom_bar(color="blue",stat="identity")
+```
