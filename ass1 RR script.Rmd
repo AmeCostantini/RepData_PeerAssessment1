@@ -5,9 +5,11 @@ setwd("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_res
 list.files()
 act1<-read.csv("activity.csv")
 ```
+
 ```{r first exploartion}
 names(act1)
-#library(xtable)
+library("gridExtra")
+library(xtable)
 library(ggplot2)
 #View(xtable(table(act1$steps)))
 table(act1$date)
@@ -18,15 +20,22 @@ table(is.na(act1$interval))
 table(is.na(act1$date))
 ```
 
-## What is mean total number of steps taken per day?
+What is mean total number of steps taken per day?
+
+For this part of the assignment, you can ignore the missing values in the dataset.
+
+Make a histogram of the total number of steps taken each day
+
+Calculate and report the mean and median total number of steps taken per day
 ```{r summary}
+library(plyr)
 library(dplyr)
 act1_agg1<-group_by(subset(act1,!is.na(steps)), date)
 act1_agg2<-summarise(act1_agg1,
-                     steps_per_each_day_mean=mean(steps),
-                     steps_per_each_day_median=median(steps),
+                     steps_per_each_interval_mean=mean(steps),
+                     steps_per_each_interval_median=median(steps),
                      steps_per_each_day=sum(steps),
-                     measurements_per_each_day=n())
+                     intervals_per_each_day=n())
 ```
 non capisco perché la mediana è pari a zero
 ```{r}
@@ -43,16 +52,19 @@ credo di aver sbagliato nel chunk summary, la media giornaliera è in realtà la
 
 credo che alla domanda si risponda così
 ```{r}
-mean(act1_agg2$steps_per_each_day)
-median(act1_agg2$steps_per_each_day)
-ggplot(data=act1_agg2, aes(x=steps_per_each_day))+
+media<-mean(act1_agg2$steps_per_each_day)
+mediana<-median(act1_agg2$steps_per_each_day)
+g1<-ggplot(data=act1_agg2, aes(x=steps_per_each_day))+
   geom_histogram(color="blue", binwidth=500)+
-  geom_vline(xintercept=mean(act1_agg2$steps_per_each_day), color="green")
+  geom_vline(xintercept=mean(act1_agg2$steps_per_each_day), color="green")+
+  scale_x_continuous(breaks=seq(0, max(act1_agg2$steps_per_each_day), 1000))+
+  scale_y_discrete(breaks=seq(0,10,1))
   
 ```
-devo mettere i nomi alle rette
+devo mettere i nomi alle rette, titolo al grafico ecc, colori migliori, legenda, ecc
 
-La media è `mean(act1_agg2$steps_per_each_day)`
+La media è `r media`
+La mediana è `r mediana`
 oppure l'istogramma dovrebbe rappresentare ogni singolo giorno?
 ```{r}
 ggplot(data=act1_agg2, aes(x=date, y=steps_per_each_day))+
@@ -65,3 +77,138 @@ alt, devo capire bene e questo scatterplot di merda mi ha anche fatto capire che
 ggplot(data=act1_agg2, aes(x=date, y=steps_per_each_day))+
   geom_bar(color="blue",stat="identity")
 ```
+
+==========================================
+
+What is the average daily activity pattern?
+
+Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+
+in questo caso devo calcolcare la media per specifico intervallo
+```{r}
+act1_agg_int<-group_by(subset(act1,!is.na(steps)), interval)
+act1_agg_int2<-summarise(act1_agg_int, 
+                          mean_steps_per_int=mean(steps),
+                          tot=n())
+```
+modifico i valori dell'intervallo per evitare lo scalino tra 55 e 100
+```{r}
+act1_agg_int2$interval2<-seq(0,5*287, 5)
+act1_agg_int2$interval3<-act1_agg_int2$interval2/60
+#act1_agg_int2$interval3<-round(act1_agg_int2$interval3, digits=2)
+#act1_agg_int2$interval2<-factor(act1_agg_int2$interval2)
+length(act1_agg_int2$interval2)
+```
+
+**problema, ho corretto il grafico delle media dei passi per intervallo, c'era il problema dello scalino da 55 a 100, ma
+ora non trovo il modo di etichettare adeguatamente l'asse x**non correggo per ora l'asse, almeno il grafico è corretto,
+anzi cambio la tipologia di intervallo dividendo per 60
+
+```{r media per intervallo}
+gp1<-ggplot(data=act1_agg_int2, aes(x=interval, y=mean_steps_per_int))+
+  geom_line()+
+  scale_x_discrete(breaks=seq(0, max(act1_agg_int2$interval), 50))#è quello sbagliato
+
+gp2<-ggplot(data=act1_agg_int2, aes(x=interval3, y=mean_steps_per_int))+
+  geom_line()+
+  scale_x_continuous(breaks=seq(0, 24.0, .5))
+
+grid.arrange(gp1, gp2)
+
+```
+
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+```{r}
+act1_agg_int2[which.max(act1_agg_int2$mean_steps_per_int),]
+```
+
+NA's
+
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs
+```{r}
+act1_NA<-subset(act1, !complete.cases(act1))
+nrow(act1_NA)
+```
+
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc
+
+uso la media di passi per intervallo
+credo dataframe di act1 con la media per intervallo attaccata, e poi riordino
+```{r}
+act1_notNA<-merge(x = act1, y = act1_agg_int2, by = "interval", all.x=TRUE)
+act1_notNA<-act1_notNA[order(act1_notNA$date,act1_notNA$interval),]
+
+act1_notNA$steps_notNA<-ifelse(is.na(act1_notNA$steps), act1_agg_int2$mean_steps_per_int, act1_notNA$steps)
+```
+
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+row.names=FALSE
+act2<-subset(act1_notNA, select=c(steps_notNA, date, interval))
+act2<-data.frame(act2, row.names=NULL)
+library("reshape")
+act2<-rename(act2,c(steps_notNA="steps"))
+```
+
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r}
+act2_agg<-group_by(act2, date)
+act2_agg2<-summarise(act2_agg,
+                     steps_per_each_interval_mean=mean(steps),
+                     steps_per_each_interval_median=median(steps),
+                     steps_per_each_day=sum(steps))
+
+media_notNA<-mean(act2_agg2$steps_per_each_day)
+mediana_notNA<-median(act2_agg2$steps_per_each_day)
+
+g2<-ggplot(data=act2_agg2, aes(x=steps_per_each_day))+
+  geom_histogram(binwidth=500, color="red")+
+  geom_vline(xintercept=mean(act2_agg2$steps_per_each_day), color="green")+
+  scale_x_continuous(breaks=seq(0, max(act2_agg2$steps_per_each_day), 1000))+
+  scale_y_discrete(breaks=seq(0,11,1))
+
+grid.arrange(g1,g2)
+```
+le due distribuzioni sono identiche, salvo la classe che include la media (10500-11000) che da frequenza 3 passa a frequenza 11.
+immagino che la cosa coincida col numero di giorni che hanno misurazioni NA
+```{r}
+nrow(act1_NA)/unique(act1_agg2$intervals_per_each_day)==8
+```
+
+### Are there differences in activity patterns between weekdays and weekends?
+###For this part the `weekdays()` function may be of some help here. Use
+###the dataset with the filled-in missing values for this part.
+###Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+distinguo tra giorni feriali e giorni festivi.
+devo convertire la variabile date in variabile temporale
+```{r weekend factor}
+
+library("lubridate")
+act2$date2 <- ymd(act2$date)
+class(act2$date2)
+weekdays(act2$date2)
+act2$day_type<-ifelse(weekdays(act2$date2)=="Domenica"|weekdays(act2$date2)=="Sabato", "weekend day", "weekday")#corretto
+act2$day_type<-factor(act2$day_type)
+str(act2)
+```
+###Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+innanzitutto ricreo l'intervallo tenporale diverso/60
+```{r}
+act2$interval2<-seq(0,287*5,5)/60
+act2$interval2<-round(act2$interval2, digits=2)
+act2$interval2<-ordered(act2$interval2)
+```
+ora devo calcolare la media dei passi compiuti per ogni intervallo, splittando per tipologia di giorno
+```{r}
+act2_agg_int1<-group_by(act2, interval2, day_type)
+act2_agg_int2<-summarise(act2_agg_int1,
+                         steps_mean=mean(steps_notNA))
+```
+non funziona!!!! non calcola bene. dovrei spostare i chunk che funzionano altrove, il codice sta diventando troppo disordinato.
+
+
+
