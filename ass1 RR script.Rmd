@@ -8,7 +8,7 @@ act1<-read.csv("activity.csv")
 
 ```{r first exploartion}
 names(act1)
-library("gridExtra")
+library(gridExtra)
 library(xtable)
 library(ggplot2)
 #View(xtable(table(act1$steps)))
@@ -200,15 +200,32 @@ innanzitutto ricreo l'intervallo tenporale diverso/60
 ```{r}
 act2$interval2<-seq(0,287*5,5)/60
 act2$interval2<-round(act2$interval2, digits=2)
-act2$interval2<-ordered(act2$interval2)
 ```
 ora devo calcolare la media dei passi compiuti per ogni intervallo, splittando per tipologia di giorno
 ```{r}
 act2_agg_int1<-group_by(act2, interval2, day_type)
+act2_agg_int1$steps<-round(act2_agg_int1$steps, digits=2)
 act2_agg_int2<-summarise(act2_agg_int1,
-                         steps_mean=mean(steps_notNA))
+                         steps_mean=mean(steps))
+act2_agg_int2$steps_mean<-round(act2_agg_int2$steps_mean, digits=2)
 ```
-non funziona!!!! non calcola bene. dovrei spostare i chunk che funzionano altrove, il codice sta diventando troppo disordinato.
+ora rendo il grafico in formato wide
+```{r}
+library("reshape2")
+act2_agg_int2_wide<-dcast(act2_agg_int2,
+                             interval2~day_type,
+                             value.var="steps_mean")
+  
+```
+grafico a due pannelli
+```{r}
+str(act2_agg_int2)
+ggplot(data=act2_agg_int2, aes(x=interval2, y=steps_mean))+
+  geom_line()+
+  scale_x_discrete(breaks=seq(0,24,.5))+
+  facet_grid(day_type~.)
+```
 
+rm(list=ls())
 
 
