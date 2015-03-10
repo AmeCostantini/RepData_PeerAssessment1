@@ -407,15 +407,16 @@ So, more steps in less peaks... that's relax and health!
 ## Launching Knitr
 
 ```r
+library("knitr")
 knit2html("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template_files/PA1_template.Rmd")
 ```
 
 ```
-## 
-## 
-## processing file: /Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template_files/PA1_template.Rmd
+## Warning in readLines(if (is.character(input2)) {: cannot open file
+## '/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template_files/PA1_template.Rmd':
+## No such file or directory
 ```
 
 ```
-## Error in parse_block(g[-1], g[1], params.src): duplicate label 'loading data'
+## Error in readLines(if (is.character(input2)) {: non posso aprire questa connessione
 ```
