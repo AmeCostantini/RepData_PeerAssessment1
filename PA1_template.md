@@ -29,6 +29,24 @@ library(plyr)
 library(dplyr)
 ```
 
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:plyr':
+## 
+##     arrange, count, desc, failwith, id, mutate, rename, summarise,
+##     summarize
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
 ## What is mean total number of steps taken per day?`
 ### 1. Make a histogram of the total number of steps taken each day
 To answer this question I aggregated the data using the dplyr package, and calculated the sum of the steps for each single day; then I calculated the mean and median of the number of steps per day and created the histogram with a vertical line for the mean.
@@ -204,6 +222,22 @@ row.names=FALSE
 act2<-subset(act1_notNA, select=c(steps_notNA, date, interval))
 act2<-data.frame(act2, row.names=NULL)
 library("reshape")
+```
+
+```
+## 
+## Attaching package: 'reshape'
+## 
+## The following object is masked from 'package:dplyr':
+## 
+##     rename
+## 
+## The following objects are masked from 'package:plyr':
+## 
+##     rename, round_any
+```
+
+```r
 act2<-rename(act2,c(steps_notNA="steps"))
 head(act2)
 ```
@@ -234,6 +268,22 @@ Sys.setlocale("LC_TIME","en_US")
 
 ```r
 library("lubridate")
+```
+
+```
+## 
+## Attaching package: 'lubridate'
+## 
+## The following object is masked from 'package:reshape':
+## 
+##     stamp
+## 
+## The following object is masked from 'package:plyr':
+## 
+##     here
+```
+
+```r
 act2$date2 <- ymd(act2$date)
 class(act2$date2)
 ```
@@ -358,15 +408,15 @@ So, more steps in less peaks... that's relax and health!
 
 ```r
 library("knitr")
-knit2html("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template_files/PA1_template.Rmd")
+knit2html("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template.Rmd")
 ```
 
 ```
-## Warning in readLines(if (is.character(input2)) {: cannot open file
-## '/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template_files/PA1_template.Rmd':
-## No such file or directory
+## 
+## 
+## processing file: /Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template.Rmd
 ```
 
 ```
-## Error in readLines(if (is.character(input2)) {: non posso aprire questa connessione
+## Error in parse_block(g[-1], g[1], params.src): duplicate label 'loading data'
 ```

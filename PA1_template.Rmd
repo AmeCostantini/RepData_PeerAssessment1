@@ -176,5 +176,5 @@ So, more steps in less peaks... that's relax and health!
 ## Launching Knitr
 ```{r}
 library("knitr")
-knit2html("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template_files/PA1_template.Rmd")
+knit2html("/Users/Americo/Documents/Education/Data_science/Coursera/reproducible_research/project/RepData_PeerAssessment1/PA1_template.Rmd")
 ```
